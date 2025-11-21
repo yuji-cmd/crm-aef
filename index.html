@@ -1045,48 +1045,137 @@
                 else if (inputConfirm !== null) {
                     alert('Número incorreto. A exclusão foi cancelada.');
                 }
+                else {
+                    document.getElementById('empty-state').style.display = 'none';
+
+                    filtrados.forEach(r => {
+                        const tr = document.createElement('tr');
+
+                        tr.innerHTML = ` <td style="color:#777" >$ {
+                            formatDate(r.data)
+                        }
+
+                        </td> <td><strong>$ {
+                            r.cliente
+                        }
+
+                        </strong><div style="font-size:10px; color:#777" >$ {
+                            r.loja || ''
+                        }
+
+                        </div></td> <td>$ {
+                            r.consultor
+                        }
+
+                        </td> <td>$ {
+                            r.representada
+                        }
+
+                        </td> <td>$ {
+                            r.item
+                        }
+
+                        </td> <td>$ {
+                            formatCurrency(r.valor)
+                        }
+
+                        </td> <td><span class="status-badge ${getStatusClass(r.status)}" >$ {
+                            r.status
+                        }
+
+                        </span></td> <td style="font-size:11px; color:#888" > $ {
+                            r.pedido ? 'PED:' + r.pedido : ''
+                        }
+
+                        <br> $ {
+                            r.orcamento ? 'ORC:' + r.orcamento : ''
+                        }
+
+                        </td> <td style="text-align:right; white-space:nowrap;" > <button class="btn-icon edit" onclick="editar(${r.id})" title="Editar" >✎</button> <button class="btn-icon delete" onclick="deletar(${r.id})" title="Excluir" >✕</button> </td> `;
+                        tbody.appendChild(tr);
+                    });
+                }
             }
-        }
 
-            ;
+            window.deletar = function (id) {
+                const reg = registros.find(r => r.id === id);
+                const num = reg ? (reg.pedido || 'N/A') : 'N/A';
 
-        window.editar = function (id) {
-            const reg = registros.find(r => r.id === id);
-            if (!reg) return;
+                if (confirm('ATENÇÃO: Deseja realmente excluir o pedido N° ' + num + '?')) {
+                    const inputConfirm = prompt('PARA CONFIRMAR A EXCLUSÃO, DIGITE O NÚMERO DO PEDIDO (' + num + '):');
 
-            editingId = id;
-            btnSubmit.innerText = "Salvar Alterações";
+                    if (inputConfirm !== null && String(inputConfirm).trim() === String(num).trim()) {
+                        registros = registros.filter(r => r.id !== id);
 
-            form.cliente.value = reg.cliente;
-            form.loja.value = reg.loja;
-            form.cidade.value = reg.cidade;
-            form.consultor.value = reg.consultor;
-            form.representada.value = reg.representada;
+                        if (editingId === id) {
+                            editingId = null;
+                            btnSubmit.innerText = "Registrar no CRM";
+                            form.reset();
 
-            // Update custom selects to reflect new values
-            [form.consultor,
-            form.representada,
-            form.status].forEach(s => createCustomSelect(s));
+                            // Reset selects
+                            document.querySelectorAll('select').forEach(s => {
+                                s.selectedIndex = 0;
+                                createCustomSelect(s);
+                            });
+                        }
 
-            form.scrollIntoView({
-                behavior: 'smooth'
-            });
-        }
+                        salvar();
+                        render();
+                        alert('Pedido excluído com sucesso.');
+                    }
 
-            ;
+                    else if (inputConfirm !== null) {
+                        alert('Número incorreto. A exclusão foi cancelada.');
+                    }
+                }
+            }
 
-        render();
+                ;
 
-        // Initial call to setup custom selects (in case DOMContentLoaded already fired)
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => {
+            window.editar = function (id) {
+                const reg = registros.find(r => r.id === id);
+                if (!reg) return;
+
+                editingId = id;
+                btnSubmit.innerText = "Salvar Alterações";
+
+                form.cliente.value = reg.cliente;
+                form.loja.value = reg.loja;
+                form.cidade.value = reg.cidade;
+                form.consultor.value = reg.consultor;
+                form.representada.value = reg.representada;
+
+                updateItemSelect(reg.representada, reg.item);
+
+                const valorFmt = (reg.valor).toFixed(2).replace('.', ',');
+                form.valor.value = 'R$ ' + valorFmt.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+
+                form.pedido.value = reg.pedido;
+                form.orcamento.value = reg.orcamento;
+                form.status.value = reg.status;
+                form.embarque.value = reg.embarque;
+                form.observacoes.value = reg.observacoes || '';
+
+                // Update custom selects to reflect new values
+                [form.consultor,
+                form.representada,
+                form.status].forEach(s => createCustomSelect(s));
+
+                form.scrollIntoView({
+                    behavior: 'smooth'
+                });
+            };
+
+            render();
+
+            // Initial call to setup custom selects (in case DOMContentLoaded already fired)
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    document.querySelectorAll('select').forEach(select => createCustomSelect(select));
+                });
+            } else {
                 document.querySelectorAll('select').forEach(select => createCustomSelect(select));
-            });
-        }
-
-        else {
-            document.querySelectorAll('select').forEach(select => createCustomSelect(select));
-        }
+            }
 
     </script>
 </body>
