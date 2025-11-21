@@ -1,4 +1,13 @@
-﻿<!DOCTYPE html>
+﻿<script>
+    window.onerror = function (msg, url, line, col, error) {
+        const div = document.createElement('div');
+        div.style.cssText = 'position:fixed;top:0;left:0;background:red;color:white;z-index:9999;padding:20px;font-size:20px;width:100%;';
+        div.textContent = 'ERROR: ' + msg + ' at line ' + line + ':' + col;
+        document.body.appendChild(div);
+        window.debugError = { msg, url, line, col, error };
+    };
+</script>
+<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
