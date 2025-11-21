@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -424,6 +424,115 @@
                 gap: 10px;
             }
         }
+
+        /* Custom Select Styles */
+        .custom-select-wrapper {
+            position: relative;
+            user-select: none;
+            width: 100%;
+        }
+
+        .custom-select {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .custom-select-trigger {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            font-size: 13px;
+            font-weight: 400;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .custom-select-trigger:after {
+            content: '▼';
+            font-size: 10px;
+            color: var(--primary);
+            margin-left: 8px;
+            transition: transform 0.2s ease;
+        }
+
+        .custom-select.open .custom-select-trigger:after {
+            transform: rotate(180deg);
+        }
+
+        .custom-select.open .custom-select-trigger {
+            border-color: var(--primary);
+            background: rgba(0, 0, 0, 0.6);
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .custom-options {
+            position: absolute;
+            display: block;
+            top: 100%;
+            left: 0;
+            right: 0;
+            border: 1px solid var(--primary);
+            border-top: 0;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            background: #1a1a1a;
+            transition: all 0.2s ease;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            z-index: 100;
+            max-height: 200px;
+            /* Scrollable height */
+            overflow-y: auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .custom-select.open .custom-options {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+        }
+
+        .custom-option {
+            position: relative;
+            display: block;
+            padding: 10px 12px;
+            font-size: 13px;
+            font-weight: 400;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .custom-option:last-child {
+            border-bottom: none;
+        }
+
+        .custom-option:hover {
+            color: #fff;
+            background: rgba(255, 102, 0, 0.2);
+            padding-left: 16px;
+        }
+
+        .custom-option.selected {
+            color: #fff;
+            background: rgba(255, 102, 0, 0.1);
+            font-weight: 600;
+        }
+
+        /* Hide native select but keep it accessible for form submission */
+        select {
+            display: none;
+        }
     </style>
 </head>
 
@@ -760,6 +869,95 @@
         const tbody = document.getElementById('crm-tbody');
         const btnSubmit = document.getElementById('btn-submit');
 
+        /* Custom Select Logic */
+        function createCustomSelect(selectElement) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'custom-select-wrapper';
+
+            const customSelect = document.createElement('div');
+            customSelect.className = 'custom-select';
+            if (selectElement.disabled) customSelect.classList.add('disabled');
+
+            const trigger = document.createElement('div');
+            trigger.className = 'custom-select-trigger';
+
+            // Handle empty/null selection safely
+            let selectedText = 'Selecione...';
+            if (selectElement.options.length > 0 && selectElement.selectedIndex >= 0) {
+                selectedText = selectElement.options[selectElement.selectedIndex].text;
+            }
+            trigger.innerHTML = `<span>${selectedText}</span>`;
+
+            if (selectElement.disabled) {
+                trigger.style.opacity = '0.5';
+                trigger.style.cursor = 'not-allowed';
+            }
+
+            const options = document.createElement('div');
+            options.className = 'custom-options';
+
+            if (!selectElement.disabled) {
+                Array.from(selectElement.options).forEach(option => {
+                    const customOption = document.createElement('div');
+                    customOption.className = 'custom-option' + (option.selected ? ' selected' : '');
+                    customOption.dataset.value = option.value;
+                    customOption.textContent = option.text;
+
+                    customOption.addEventListener('click', function () {
+                        customSelect.querySelector('.custom-option.selected')?.classList.remove('selected');
+                        this.classList.add('selected');
+                        trigger.querySelector('span').textContent = this.textContent;
+
+                        selectElement.value = this.dataset.value;
+                        selectElement.dispatchEvent(new Event('change'));
+                        selectElement.dispatchEvent(new Event('input'));
+
+                        customSelect.classList.remove('open');
+                    });
+
+                    options.appendChild(customOption);
+                });
+
+                trigger.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    if (selectElement.disabled) return;
+
+                    document.querySelectorAll('.custom-select').forEach(el => {
+                        if (el !== customSelect) el.classList.remove('open');
+                    });
+                    customSelect.classList.toggle('open');
+                });
+            }
+
+            customSelect.appendChild(trigger);
+            customSelect.appendChild(options);
+            wrapper.appendChild(customSelect);
+
+            // Remove existing wrapper if it exists (cleanup)
+            if (selectElement.nextElementSibling && selectElement.nextElementSibling.classList.contains('custom-select-wrapper')) {
+                selectElement.nextElementSibling.remove();
+            }
+
+            selectElement.style.display = 'none';
+            selectElement.parentNode.insertBefore(wrapper, selectElement.nextSibling);
+
+            return wrapper;
+        }
+
+        // Initialize custom selects
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('select').forEach(select => {
+                createCustomSelect(select);
+            });
+        });
+
+        // Close selects when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.custom-select')) {
+                document.querySelectorAll('.custom-select').forEach(el => el.classList.remove('open'));
+            }
+        });
+
         repSelect.addEventListener('change', () => {
             updateItemSelect(repSelect.value);
         });
@@ -778,6 +976,8 @@
             } else {
                 itemSelect.disabled = true;
             }
+            // Re-create custom select for item
+            createCustomSelect(itemSelect);
         }
 
         function formatarMoedaInput(input) {
@@ -838,6 +1038,13 @@
             form.reset();
             itemSelect.disabled = true;
             itemSelect.innerHTML = '<option value="">Selecione a marca antes</option>';
+
+            // Reset custom selects
+            document.querySelectorAll('select').forEach(s => {
+                s.selectedIndex = 0;
+                createCustomSelect(s);
+            });
+            createCustomSelect(itemSelect); // Ensure disabled state is rendered
         });
 
         function salvar() {
@@ -883,6 +1090,13 @@
             fRepresentada.value = "";
             fItem.value = "";
             fStatus.value = "";
+
+            // Reset custom selects for filters
+            [fConsultor, fRepresentada, fStatus].forEach(s => {
+                s.selectedIndex = 0;
+                createCustomSelect(s);
+            });
+
             render();
         });
 
@@ -956,6 +1170,11 @@
                         editingId = null;
                         btnSubmit.innerText = "Registrar no CRM";
                         form.reset();
+                        // Reset selects
+                        document.querySelectorAll('select').forEach(s => {
+                            s.selectedIndex = 0;
+                            createCustomSelect(s);
+                        });
                     }
                     salvar();
                     render();
@@ -990,10 +1209,22 @@
             form.embarque.value = reg.embarque;
             form.observacoes.value = reg.observacoes || '';
 
+            // Update custom selects to reflect new values
+            [form.consultor, form.representada, form.status].forEach(s => createCustomSelect(s));
+
             form.scrollIntoView({ behavior: 'smooth' });
         };
 
         render();
+
+        // Initial call to setup custom selects (in case DOMContentLoaded already fired)
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelectorAll('select').forEach(select => createCustomSelect(select));
+            });
+        } else {
+            document.querySelectorAll('select').forEach(select => createCustomSelect(select));
+        }
 
     </script>
 </body>
