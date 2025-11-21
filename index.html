@@ -1,0 +1,1232 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>A&F CRM | AntiGravity Edition</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        :root {
+            --primary: #ff6600;
+            --primary-glow: rgba(255, 102, 0, 0.4);
+            --bg-deep: #050505;
+            --glass-bg: rgba(15, 15, 20, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --radius: 16px;
+            --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            outline: none;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        #canvas-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .app-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-rows: auto auto 1fr;
+            gap: 24px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+            margin-bottom: 10px;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-box {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #ff8800, #cc4400);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 24px;
+            color: #000;
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .logo-text h1 {
+            font-size: 24px;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text span {
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 20px;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(255, 102, 0, 0.3);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #fff, #ccc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-sub {
+            font-size: 11px;
+            color: var(--primary);
+            margin-top: 4px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        .panel-header {
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-title::before {
+            content: '';
+            display: block;
+            width: 6px;
+            height: 6px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--primary);
+        }
+
+        form {
+            display: grid;
+            gap: 16px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: #fff;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.1);
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(90deg, #ff7b00, #e65c00);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 102, 0, 0.2);
+            margin-top: 8px;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 25px rgba(255, 102, 0, 0.4);
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .filters-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        thead {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 16px;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            color: #eee;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .st-implantado {
+            background: rgba(46, 204, 113, 0.15);
+            color: #2ecc71;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+
+        .st-producao {
+            background: rgba(241, 196, 15, 0.15);
+            color: #f1c40f;
+            border: 1px solid rgba(241, 196, 15, 0.3);
+        }
+
+        .st-pago {
+            background: rgba(52, 152, 219, 0.15);
+            color: #3498db;
+            border: 1px solid rgba(52, 152, 219, 0.3);
+        }
+
+        .st-atrasado {
+            background: rgba(231, 76, 60, 0.15);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .st-cancelado {
+            background: rgba(149, 165, 166, 0.15);
+            color: #95a5a6;
+            border: 1px solid rgba(149, 165, 166, 0.3);
+            text-decoration: line-through;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            color: #555;
+            cursor: pointer;
+            transition: 0.2s;
+            padding: 4px;
+        }
+
+        .btn-icon:hover {
+            color: #fff;
+        }
+
+        .btn-icon.delete:hover {
+            color: #e74c3c;
+        }
+
+        .btn-icon.edit:hover {
+            color: #f1c40f;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        @media (max-width: 1024px) {
+            .stats-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row,
+            .form-row-3 {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+
+        /* Custom Select Styles */
+        .custom-select-wrapper {
+            position: relative;
+            user-select: none;
+            width: 100%;
+        }
+
+        .custom-select {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .custom-select-trigger {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            font-size: 13px;
+            font-weight: 400;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .custom-select-trigger:after {
+            content: '▼';
+            font-size: 10px;
+            color: var(--primary);
+            margin-left: 8px;
+            transition: transform 0.2s ease;
+        }
+
+        .custom-select.open .custom-select-trigger:after {
+            transform: rotate(180deg);
+        }
+
+        .custom-select.open .custom-select-trigger {
+            border-color: var(--primary);
+            background: rgba(0, 0, 0, 0.6);
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .custom-options {
+            position: absolute;
+            display: block;
+            top: 100%;
+            left: 0;
+            right: 0;
+            border: 1px solid var(--primary);
+            border-top: 0;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            background: #1a1a1a;
+            transition: all 0.2s ease;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            z-index: 100;
+            max-height: 200px;
+            /* Scrollable height */
+            overflow-y: auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .custom-select.open .custom-options {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+        }
+
+        .custom-option {
+            position: relative;
+            display: block;
+            padding: 10px 12px;
+            font-size: 13px;
+            font-weight: 400;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .custom-option:last-child {
+            border-bottom: none;
+        }
+
+        .custom-option:hover {
+            color: #fff;
+            background: rgba(255, 102, 0, 0.2);
+            padding-left: 16px;
+        }
+
+        .custom-option.selected {
+            color: #fff;
+            background: rgba(255, 102, 0, 0.1);
+            font-weight: 600;
+        }
+
+        /* Hide native select but keep it accessible for form submission */
+        select {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <canvas id="canvas-bg"></canvas>
+
+    <div class="app-wrapper">
+
+        <header>
+            <div class="logo-area">
+                <div class="logo-box">A&F</div>
+                <div class="logo-text">
+                    <h1>CRM Comercial</h1>
+                    <span>Gestão de Pedidos & Performance</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-label">Total de Pedidos</div>
+                <div class="stat-value" id="kpi-total">0</div>
+                <div class="stat-sub">Volume Geral</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pedidos Implantados</div>
+                <div class="stat-value" id="kpi-implantados">0</div>
+                <div class="stat-sub" style="color: #2ecc71">Sucesso Comercial</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pedidos Cancelados</div>
+                <div class="stat-value" id="kpi-cancelados">0</div>
+                <div class="stat-sub" style="color: #e74c3c">Não Efetivados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Volume Implantado (R$)</div>
+                <div class="stat-value" id="kpi-valor-imp">R$ 0,00</div>
+                <div class="stat-sub">Faturamento Potencial</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Caixa Realizado (Pago)</div>
+                <div class="stat-value" id="kpi-valor-pago">R$ 0,00</div>
+                <div class="stat-sub" style="color: #3498db">Entrada Efetiva</div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+
+            <section class="glass-panel">
+                <div class="panel-header">
+                    <div class="panel-title">Novo Pedido</div>
+                </div>
+                <form id="crm-form">
+                    <div>
+                        <label>Cliente *</label>
+                        <input name="cliente" type="text" placeholder="Razão Social ou Fantasia" required />
+                    </div>
+
+                    <div class="form-row">
+                        <div>
+                            <label>Loja / Unidade</label>
+                            <input name="loja" type="text" />
+                        </div>
+                        <div>
+                            <label>Cidade / UF</label>
+                            <input name="cidade" type="text" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div>
+                            <label>Consultor *</label>
+                            <select name="consultor" required>
+                                <option value="">Selecione...</option>
+                                <option>Roni</option>
+                                <option>Renan</option>
+                                <option>Wilian</option>
+                                <option>Bruno</option>
+                                <option>Yuji</option>
+                                <option>Walber</option>
+                                <option>Jerry</option>
+                                <option>Adriano</option>
+                                <option>Erick</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Representada *</label>
+                            <select id="representada" name="representada" required>
+                                <option value="">Marca...</option>
+                                <option value="Fast">Fast</option>
+                                <option value="ProMarket">ProMarket</option>
+                                <option value="Eletrofrio">Eletrofrio</option>
+                                <option value="ComfortLux">ComfortLux</option>
+                                <option value="Maxi Trust">Maxi Trust</option>
+                                <option value="Terminox">Terminox</option>
+                                <option value="Rod-Car">Rod-Car</option>
+                                <option value="BYG">BYG</option>
+                                <option value="Marksell">Marksell</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label>Item / Produto *</label>
+                        <select id="item" name="item" required disabled>
+                            <option value="">Selecione a marca antes</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row-3">
+                        <div>
+                            <label>Valor (R$) *</label>
+                            <input name="valor" type="text" placeholder="R$ 0,00" required
+                                oninput="formatarMoedaInput(this)" />
+                        </div>
+                        <div>
+                            <label>Pedido Nº</label>
+                            <input name="pedido" type="text" />
+                        </div>
+                        <div>
+                            <label>Orçamento Nº</label>
+                            <input name="orcamento" type="text" />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div>
+                            <label>Status *</label>
+                            <select name="status" required>
+                                <option value="Implantado">Implantado</option>
+                                <option value="Em produção">Em produção</option>
+                                <option value="Pago">Pago</option>
+                                <option value="Atrasado">Atrasado</option>
+                                <option value="Cancelado">Cancelado</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Embarque</label>
+                            <input name="embarque" type="text" placeholder="DD/MM/AAAA" maxlength="10"
+                                oninput="mascaraData(this)" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label>Observações</label>
+                        <textarea name="observacoes" rows="2"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="btn-submit">Registrar no CRM</button>
+                </form>
+            </section>
+
+            <section class="glass-panel">
+                <div class="panel-header">
+                    <div class="panel-title">Gestão de Carteira</div>
+                </div>
+
+                <div class="filters-bar">
+                    <div class="filter-group">
+                        <label>Cliente</label>
+                        <input type="text" id="filtro-cliente" placeholder="Buscar Cliente...">
+                    </div>
+                    <div class="filter-group">
+                        <label>Consultor</label>
+                        <select id="filtro-consultor">
+                            <option value="">Todos</option>
+                            <option>Roni</option>
+                            <option>Renan</option>
+                            <option>Wilian</option>
+                            <option>Bruno</option>
+                            <option>Yuji</option>
+                            <option>Walber</option>
+                            <option>Jerry</option>
+                            <option>Adriano</option>
+                            <option>Erick</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Representada</label>
+                        <select id="filtro-representada">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Item</label>
+                        <input type="text" id="filtro-item" placeholder="Buscar Item...">
+                    </div>
+                    <div class="filter-group">
+                        <label>Status</label>
+                        <select id="filtro-status">
+                            <option value="">Todos</option>
+                            <option>Implantado</option>
+                            <option>Em produção</option>
+                            <option>Pago</option>
+                            <option>Atrasado</option>
+                            <option>Cancelado</option>
+                        </select>
+                    </div>
+                    <div class="filter-group" style="display:flex; align-items:flex-end;">
+                        <button class="btn-secondary" id="reset-filtros-btn"
+                            style="width:100%; height:42px;">Limpar</button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Cliente</th>
+                                <th>Consultor</th>
+                                <th>Representada</th>
+                                <th>Item</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Docs</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="crm-tbody">
+                        </tbody>
+                    </table>
+                    <div id="empty-state" style="text-align:center; padding:40px; color:#555;">
+                        Nenhum registro encontrado.
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let points = [];
+        const spacing = 30;
+        let mouse = { x: -1000, y: -1000 };
+        let time = 0;
+
+        function initCanvas() {
+            resize();
+            window.addEventListener('resize', resize);
+            window.addEventListener('mousemove', e => {
+                mouse.x = e.clientX;
+                mouse.y = e.clientY;
+            });
+            animate();
+        }
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            points = [];
+            for (let x = 0; x < width + spacing; x += spacing) {
+                for (let y = 0; y < height + spacing; y += spacing) {
+                    points.push({
+                        x: x,
+                        y: y,
+                        originX: x,
+                        originY: y,
+                        angle: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+            const grad = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, width);
+            grad.addColorStop(0, '#111');
+            grad.addColorStop(1, '#000');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.strokeStyle = 'rgba(255, 102, 0, 0.12)';
+            ctx.lineWidth = 1;
+
+            time += 0.02;
+
+            for (let i = 0; i < points.length; i++) {
+                const p = points[i];
+
+                const waveY = Math.sin(p.originX * 0.01 + time) * 10 + Math.sin(p.originY * 0.01 + time) * 10;
+
+                const dx = mouse.x - p.x;
+                const dy = mouse.y - p.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const maxDist = 200;
+                let mouseEffectX = 0;
+                let mouseEffectY = 0;
+
+                if (dist < maxDist) {
+                    const force = (maxDist - dist) / maxDist;
+                    const angle = Math.atan2(dy, dx);
+                    mouseEffectX = Math.cos(angle) * force * -30;
+                    mouseEffectY = Math.sin(angle) * force * -30;
+                }
+
+                p.x = p.originX + mouseEffectX;
+                p.y = p.originY + waveY + mouseEffectY;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 102, 0, 0.3)';
+                ctx.fill();
+            }
+
+            requestAnimationFrame(animate);
+        }
+        initCanvas();
+
+        const ITEMS_BY_REPRESENTADA = {
+            "Fast": ["Cadeira", "Checkout", "Drive-in", "Exp. Combinado", "Exp. Horizontal", "Exp. Vertical", "Gôndola", "Porta Palete", "Rack Slim"],
+            "ProMarket": ["Adega", "Churrasco", "Empório", "Hortifruti", "Padaria", "Peças", "Projetos especiais"],
+            "Eletrofrio": ["Câmaras", "Expositores", "Ilhas", "Painéis", "Serviço Técnico", "Peças de Reposição"],
+            "ComfortLux": ["Iluminação Natural", "Iluminação LED"],
+            "Maxi Trust": ["Grupo Gerador"],
+            "Terminox": ["Serralheria", "Mobiliário Inox"],
+            "Rod-Car": ["Rodízios", "Carros de Apoio", "Cestos"],
+            "BYG": ["Transpaleteira", "Empilhadeira"],
+            "Marksell": ["Doca móvel", "Niveladora"]
+        };
+
+        const STORAGE_KEY = "af_crm_pro_v2";
+        let registros = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        let editingId = null;
+
+        const form = document.getElementById('crm-form');
+        const repSelect = document.getElementById('representada');
+        const itemSelect = document.getElementById('item');
+        const tbody = document.getElementById('crm-tbody');
+        const btnSubmit = document.getElementById('btn-submit');
+
+        /* Custom Select Logic */
+        function createCustomSelect(selectElement) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'custom-select-wrapper';
+
+            const customSelect = document.createElement('div');
+            customSelect.className = 'custom-select';
+            if (selectElement.disabled) customSelect.classList.add('disabled');
+
+            const trigger = document.createElement('div');
+            trigger.className = 'custom-select-trigger';
+
+            // Handle empty/null selection safely
+            let selectedText = 'Selecione...';
+            if (selectElement.options.length > 0 && selectElement.selectedIndex >= 0) {
+                selectedText = selectElement.options[selectElement.selectedIndex].text;
+            }
+            trigger.innerHTML = `<span>${selectedText}</span>`;
+
+            if (selectElement.disabled) {
+                trigger.style.opacity = '0.5';
+                trigger.style.cursor = 'not-allowed';
+            }
+
+            const options = document.createElement('div');
+            options.className = 'custom-options';
+
+            if (!selectElement.disabled) {
+                Array.from(selectElement.options).forEach(option => {
+                    const customOption = document.createElement('div');
+                    customOption.className = 'custom-option' + (option.selected ? ' selected' : '');
+                    customOption.dataset.value = option.value;
+                    customOption.textContent = option.text;
+
+                    customOption.addEventListener('click', function () {
+                        customSelect.querySelector('.custom-option.selected')?.classList.remove('selected');
+                        this.classList.add('selected');
+                        trigger.querySelector('span').textContent = this.textContent;
+
+                        selectElement.value = this.dataset.value;
+                        selectElement.dispatchEvent(new Event('change'));
+                        selectElement.dispatchEvent(new Event('input'));
+
+                        customSelect.classList.remove('open');
+                    });
+
+                    options.appendChild(customOption);
+                });
+
+                trigger.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    if (selectElement.disabled) return;
+
+                    document.querySelectorAll('.custom-select').forEach(el => {
+                        if (el !== customSelect) el.classList.remove('open');
+                    });
+                    customSelect.classList.toggle('open');
+                });
+            }
+
+            customSelect.appendChild(trigger);
+            customSelect.appendChild(options);
+            wrapper.appendChild(customSelect);
+
+            // Remove existing wrapper if it exists (cleanup)
+            if (selectElement.nextElementSibling && selectElement.nextElementSibling.classList.contains('custom-select-wrapper')) {
+                selectElement.nextElementSibling.remove();
+            }
+
+            selectElement.style.display = 'none';
+            selectElement.parentNode.insertBefore(wrapper, selectElement.nextSibling);
+
+            return wrapper;
+        }
+
+        // Initialize custom selects
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('select').forEach(select => {
+                createCustomSelect(select);
+            });
+        });
+
+        // Close selects when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.custom-select')) {
+                document.querySelectorAll('.custom-select').forEach(el => el.classList.remove('open'));
+            }
+        });
+
+        repSelect.addEventListener('change', () => {
+            updateItemSelect(repSelect.value);
+        });
+
+        function updateItemSelect(marca, selectedItem = null) {
+            itemSelect.innerHTML = '<option value="">Selecione...</option>';
+            if (marca && ITEMS_BY_REPRESENTADA[marca]) {
+                ITEMS_BY_REPRESENTADA[marca].forEach(i => {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.innerText = i;
+                    if (selectedItem === i) opt.selected = true;
+                    itemSelect.appendChild(opt);
+                });
+                itemSelect.disabled = false;
+            } else {
+                itemSelect.disabled = true;
+            }
+            // Re-create custom select for item
+            createCustomSelect(itemSelect);
+        }
+
+        function formatarMoedaInput(input) {
+            let v = input.value.replace(/\D/g, '');
+            v = (v / 100).toFixed(2) + '';
+            v = v.replace('.', ',');
+            v = v.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+            input.value = 'R$ ' + v;
+        }
+
+        function mascaraData(input) {
+            let v = input.value.replace(/\D/g, '');
+            if (v.length > 2) v = v.slice(0, 2) + '/' + v.slice(2);
+            if (v.length > 5) v = v.slice(0, 5) + '/' + v.slice(5);
+            input.value = v;
+        }
+
+        function parseMoeda(valorStr) {
+            if (!valorStr) return 0;
+            return parseFloat(valorStr.replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+        }
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            const fd = new FormData(form);
+
+            const dados = {
+                data: new Date().toISOString(),
+                cliente: fd.get('cliente'),
+                loja: fd.get('loja'),
+                cidade: fd.get('cidade'),
+                consultor: fd.get('consultor'),
+                representada: fd.get('representada'),
+                item: fd.get('item'),
+                valor: parseMoeda(fd.get('valor')),
+                pedido: fd.get('pedido'),
+                orcamento: fd.get('orcamento'),
+                status: fd.get('status'),
+                embarque: fd.get('embarque')
+            };
+
+            if (editingId) {
+                const idx = registros.findIndex(r => r.id === editingId);
+                if (idx !== -1) {
+                    registros[idx] = { ...registros[idx], ...dados };
+                    alert('Pedido atualizado com sucesso!');
+                }
+                editingId = null;
+                btnSubmit.innerText = "Registrar no CRM";
+            } else {
+                dados.id = Date.now();
+                registros.push(dados);
+                alert('Pedido registrado com sucesso!');
+            }
+
+            salvar();
+            render();
+            form.reset();
+            itemSelect.disabled = true;
+            itemSelect.innerHTML = '<option value="">Selecione a marca antes</option>';
+
+            // Reset custom selects
+            document.querySelectorAll('select').forEach(s => {
+                s.selectedIndex = 0;
+                createCustomSelect(s);
+            });
+            createCustomSelect(itemSelect); // Ensure disabled state is rendered
+        });
+
+        function salvar() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(registros));
+        }
+
+        function formatCurrency(val) {
+            return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        function formatDate(iso) {
+            const d = new Date(iso);
+            return d.toLocaleDateString('pt-BR');
+        }
+
+        function getStatusClass(st) {
+            if (st === 'Implantado') return 'st-implantado';
+            if (st === 'Pago') return 'st-pago';
+            if (st === 'Em produção') return 'st-producao';
+            if (st === 'Atrasado') return 'st-atrasado';
+            if (st === 'Cancelado') return 'st-cancelado';
+            return '';
+        }
+
+        const fCliente = document.getElementById('filtro-cliente');
+        const fConsultor = document.getElementById('filtro-consultor');
+        const fRepresentada = document.getElementById('filtro-representada');
+        const fItem = document.getElementById('filtro-item');
+        const fStatus = document.getElementById('filtro-status');
+
+        Object.keys(ITEMS_BY_REPRESENTADA).forEach(rep => {
+            const opt = document.createElement('option');
+            opt.value = rep;
+            opt.innerText = rep;
+            fRepresentada.appendChild(opt);
+        });
+
+        [fCliente, fConsultor, fRepresentada, fItem, fStatus].forEach(el => el.addEventListener('input', render));
+
+        document.getElementById('reset-filtros-btn').addEventListener('click', () => {
+            fCliente.value = "";
+            fConsultor.value = "";
+            fRepresentada.value = "";
+            fItem.value = "";
+            fStatus.value = "";
+
+            // Reset custom selects for filters
+            [fConsultor, fRepresentada, fStatus].forEach(s => {
+                s.selectedIndex = 0;
+                createCustomSelect(s);
+            });
+
+            render();
+        });
+
+        function render() {
+            tbody.innerHTML = '';
+            const filtrados = registros.filter(r => {
+                const matchCliente = fCliente.value ? r.cliente.toLowerCase().includes(fCliente.value.toLowerCase()) : true;
+                const matchConsultor = fConsultor.value ? r.consultor === fConsultor.value : true;
+                const matchRep = fRepresentada.value ? r.representada === fRepresentada.value : true;
+                const matchItem = fItem.value ? r.item.toLowerCase().includes(fItem.value.toLowerCase()) : true;
+                const matchStatus = fStatus.value ? r.status === fStatus.value : true;
+
+                return matchCliente && matchConsultor && matchRep && matchItem && matchStatus;
+            }).sort((a, b) => new Date(b.data) - new Date(a.data));
+
+            document.getElementById('kpi-total').innerText = filtrados.length;
+
+            // Implantados: todos EXCETO Cancelado
+            const implantados = filtrados.filter(r => r.status !== 'Cancelado');
+            document.getElementById('kpi-implantados').innerText = implantados.length;
+
+            // Cancelados
+            const cancelados = filtrados.filter(r => r.status === 'Cancelado');
+            document.getElementById('kpi-cancelados').innerText = cancelados.length;
+
+            // Volume Implantado: soma de todos EXCETO Cancelado
+            const valTotal = filtrados.filter(r => r.status !== 'Cancelado').reduce((acc, r) => acc + (r.valor || 0), 0);
+            document.getElementById('kpi-valor-imp').innerText = formatCurrency(valTotal);
+
+            const valPago = filtrados.filter(r => r.status === 'Pago').reduce((acc, r) => acc + (r.valor || 0), 0);
+            document.getElementById('kpi-valor-pago').innerText = formatCurrency(valPago);
+
+            if (filtrados.length === 0) {
+                document.getElementById('empty-state').style.display = 'block';
+            } else {
+                document.getElementById('empty-state').style.display = 'none';
+                filtrados.forEach(r => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+            <td style="color:#777">${formatDate(r.data)}</td>
+            <td><strong>${r.cliente}</strong><div style="font-size:10px; color:#777">${r.loja || ''}</div></td>
+            <td>${r.consultor}</td>
+            <td>${r.representada}</td>
+            <td>${r.item}</td>
+            <td>${formatCurrency(r.valor)}</td>
+            <td><span class="status-badge ${getStatusClass(r.status)}">${r.status}</span></td>
+            <td style="font-size:11px; color:#888">
+              ${r.pedido ? 'PED:' + r.pedido : ''}<br>
+              ${r.orcamento ? 'ORC:' + r.orcamento : ''}
+            </td>
+            <td style="text-align:right; white-space:nowrap;">
+              <button class="btn-icon edit" onclick="editar(${r.id})" title="Editar">✎</button>
+              <button class="btn-icon delete" onclick="deletar(${r.id})" title="Excluir">✕</button>
+            </td>
+          `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+
+        window.deletar = function (id) {
+            const reg = registros.find(r => r.id === id);
+            const num = reg ? (reg.pedido || 'N/A') : 'N/A';
+
+            if (confirm('ATENÇÃO: Deseja realmente excluir o pedido N° ' + num + '?')) {
+                const inputConfirm = prompt('PARA CONFIRMAR A EXCLUSÃO, DIGITE O NÚMERO DO PEDIDO (' + num + '):');
+
+                if (inputConfirm !== null && String(inputConfirm).trim() === String(num).trim()) {
+                    registros = registros.filter(r => r.id !== id);
+                    if (editingId === id) {
+                        editingId = null;
+                        btnSubmit.innerText = "Registrar no CRM";
+                        form.reset();
+                        // Reset selects
+                        document.querySelectorAll('select').forEach(s => {
+                            s.selectedIndex = 0;
+                            createCustomSelect(s);
+                        });
+                    }
+                    salvar();
+                    render();
+                    alert('Pedido excluído com sucesso.');
+                } else if (inputConfirm !== null) {
+                    alert('Número incorreto. A exclusão foi cancelada.');
+                }
+            }
+        };
+
+        window.editar = function (id) {
+            const reg = registros.find(r => r.id === id);
+            if (!reg) return;
+
+            editingId = id;
+            btnSubmit.innerText = "Salvar Alterações";
+
+            form.cliente.value = reg.cliente;
+            form.loja.value = reg.loja;
+            form.cidade.value = reg.cidade;
+            form.consultor.value = reg.consultor;
+            form.representada.value = reg.representada;
+
+            updateItemSelect(reg.representada, reg.item);
+
+            const valorFmt = (reg.valor).toFixed(2).replace('.', ',');
+            form.valor.value = 'R$ ' + valorFmt.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+
+            form.pedido.value = reg.pedido;
+            form.orcamento.value = reg.orcamento;
+            form.status.value = reg.status;
+            form.embarque.value = reg.embarque;
+            form.observacoes.value = reg.observacoes || '';
+
+            // Update custom selects to reflect new values
+            [form.consultor, form.representada, form.status].forEach(s => createCustomSelect(s));
+
+            form.scrollIntoView({ behavior: 'smooth' });
+        };
+
+        render();
+
+        // Initial call to setup custom selects (in case DOMContentLoaded already fired)
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelectorAll('select').forEach(select => createCustomSelect(select));
+            });
+        } else {
+            document.querySelectorAll('select').forEach(select => createCustomSelect(select));
+        }
+
+    </script>
+</body>
+
+</html>
